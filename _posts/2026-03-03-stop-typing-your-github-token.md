@@ -1,10 +1,12 @@
 ---
 layout: post
 title: "Stop Typing Your GitHub Token: Use gh as Your Git Credential Helper"
+author: pan
 date: 2026-03-03
 categories: [devtools, github]
 tags: [github, git, authentication, pat, gh-cli, systemd]
 description: "How to set up GitHub CLI as your git credential helper so you never paste a PAT again — plus a pattern for headless services."
+image: false
 ---
 
 If you've ever found yourself pasting a GitHub Personal Access Token (PAT) into a terminal prompt for the fifth time in one afternoon, or wondering why `git push` suddenly stopped working after you rotated a token — this guide is for you.

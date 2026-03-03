@@ -1,16 +1,51 @@
-title: Pan's Dev Notes
-description: Technical guides, lessons learned, and things I figured out the hard way.
-author: Chao Pan
+title: "Pan's Dev Notes"
+description: "Technical guides, lessons learned, and things I figured out the hard way."
+baseurl: ""
 url: "https://pancodia-lab.github.io"
 
-theme: minima
+# Theme
+remote_theme: wowthemesnet/mediumish-theme-jekyll
 
-# Build settings
+# Site branding
+logo: false
+favicon: false
+
+# Author(s)
+authors:
+  pan:
+    name: Chao Pan
+    display_name: Pan
+    description: "Building AI agents, writing about developer tooling and infrastructure."
+    # avatar: 'assets/images/avatar.png'  # add your photo later
+
+# Plugins
+plugins:
+  - jekyll-remote-theme
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Pagination
+paginate: 6
+paginate_path: /page:num/
+
+# Permalinks
+permalink: /:title/
+
+# Markdown
 markdown: kramdown
-permalink: /:year/:month/:day/:title/
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
 
-# Social / footer links (optional — uncomment and fill in as you like)
-# minima:
-#   social_links:
-#     - { platform: github, user_url: "https://github.com/pancodia" }
-#     - { platform: linkedin, user_url: "https://linkedin.com/in/yourprofile" }
+# Lazy images
+lazyimages: "disabled"
+
+# Exclude
+exclude: [changelog.md, LICENSE.txt, README.md, Gemfile, Gemfile.lock]
+
+include: ["_pages"]
