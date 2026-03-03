@@ -1,51 +1,37 @@
+# Site settings
 title: "Pan's Dev Notes"
 description: "Technical guides, lessons learned, and things I figured out the hard way."
 baseurl: ""
 url: "https://pancodia-lab.github.io"
 
 # Theme
-remote_theme: wowthemesnet/mediumish-theme-jekyll
+remote_theme: chesterhow/tale
 
-# Site branding
-logo: false
-favicon: false
+# Author
+author:
+  name: Chao Pan
+  url: https://github.com/pancodia
 
-# Author(s)
-authors:
-  pan:
-    name: Chao Pan
-    display_name: Pan
-    description: "Building AI agents, writing about developer tooling and infrastructure."
-    # avatar: 'assets/images/avatar.png'  # add your photo later
+# Build settings
+markdown: kramdown
+include:
+  - _pages
+
+# Assets
+sass:
+  sass_dir: _sass
+  style: compressed
 
 # Plugins
 plugins:
-  - jekyll-remote-theme
-  - jekyll-paginate
-  - jekyll-sitemap
   - jekyll-feed
+  - jekyll-paginate
   - jekyll-seo-tag
-
-# Pagination
-paginate: 6
-paginate_path: /page:num/
+  - jekyll-remote-theme
 
 # Permalinks
-permalink: /:title/
+permalink: /:year-:month-:day/:title
+paginate: 5
 
-# Markdown
-markdown: kramdown
-kramdown:
-  input: GFM
-  syntax_highlighter: rouge
-  syntax_highlighter_opts:
-    block:
-      line_numbers: true
-
-# Lazy images
-lazyimages: "disabled"
-
-# Exclude
-exclude: [changelog.md, LICENSE.txt, README.md, Gemfile, Gemfile.lock]
-
-include: ["_pages"]
+# Excludes
+exclude: [Gemfile, Gemfile.lock, README.md]

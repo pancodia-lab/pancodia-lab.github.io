@@ -2,28 +2,3 @@
 layout: default
 title: Home
 ---
-
-<div class="container">
-  <div class="row listrecent">
-    {% for post in paginator.posts %}
-    <div class="col-lg-4 col-md-6 mb-30px card-group">
-      <div class="card h-100">
-        <div class="card-body">
-          <h2 class="card-title">
-            <a class="text-dark" href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
-          </h2>
-          <h4 class="card-text">{{ post.description | default: post.excerpt | strip_html | truncatewords: 33 }}</h4>
-        </div>
-        <div class="card-footer bg-white">
-          <div class="wrapfooter">
-            <span class="author-meta">
-              <span class="post-name">{{ site.authors[post.author].display_name | default: post.author }}</span><br/>
-              <span class="post-date">{{ post.date | date: '%B %d, %Y' }}</span>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</div>

@@ -1,12 +1,7 @@
 ---
 layout: post
 title: "How to Set Up a GitHub Pages Blog with Jekyll in 10 Minutes"
-author: pan
 date: 2026-03-03
-categories: [devtools, github]
-tags: [github-pages, jekyll, blog, static-site]
-description: "A step-by-step guide to creating a dev blog on GitHub Pages using Jekyll — from zero to published post."
-image: false
 ---
 
 You want a dev blog. You don't want to manage a server, pay for hosting, or fight with a CMS. You just want to write markdown, push to GitHub, and have a site.
