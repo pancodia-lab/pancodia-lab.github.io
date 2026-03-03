@@ -1,0 +1,16 @@
+title: Pan's Dev Notes
+description: Technical guides, lessons learned, and things I figured out the hard way.
+author: Chao Pan
+url: "https://pancodia.github.io"
+
+theme: minima
+
+# Build settings
+markdown: kramdown
+permalink: /:year/:month/:day/:title/
+
+# Social / footer links (optional — uncomment and fill in as you like)
+# minima:
+#   social_links:
+#     - { platform: github, user_url: "https://github.com/pancodia" }
+#     - { platform: linkedin, user_url: "https://linkedin.com/in/yourprofile" }
