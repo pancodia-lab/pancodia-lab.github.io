@@ -30,6 +30,9 @@ We decided to take this seriously in our codebase.
 
 In AgentDojo, we drew a line:
 
+![AgentDojo planning vs execution design diagram](/assets/img/agentdojo-planning-vs-execution-design.svg)
+*Design diagram: planning owns policy and plan quality; execution owns safe, auditable action loops.*
+
 **Planning layer** (decides what):
 - Proposes a structured todo list
 - Can use multiple LLM calls to brainstorm, score, and refine plans
