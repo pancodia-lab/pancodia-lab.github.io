@@ -62,7 +62,7 @@ The constraint that **only one item can be `in_progress`** has been practically 
 
 ## The kitchen counter analogy
 
-A metaphor that helped us make this separation concrete is a kitchen setup.
+A metaphor that helped us explain this more clearly is a kitchen setup.
 
 Imagine the planner as someone cooking from a **recipe card**. The card itself is just the plan: what steps exist and what status each step is in. In our code, that role maps to `TodoManager`.
 
