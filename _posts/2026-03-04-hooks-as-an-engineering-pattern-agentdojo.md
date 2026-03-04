@@ -32,13 +32,19 @@ We needed a better pattern.
 
 ## The insight: hooks are just "tell me when something happens"
 
-If you've used Git hooks, React hooks, or WordPress hooks, you already know the core idea — even if those implementations look very different from each other.
+Think about a restaurant kitchen. The head chef runs the line: prep, cook, plate. That's the core loop. Now imagine the restaurant also wants a food photographer to snap pictures of each dish before it goes out.
 
-A **hook** is a callback point that the core system exposes. The core system decides **when** to call it. The hook implementation decides **what** to do.
+You could have the head chef stop, pull out a camera, take a photo, put the camera away, and go back to cooking. But that's messy — the chef shouldn't need to know about photography.
 
-That's it. No magic.
+Instead, the chef just announces: **"Dish up!"** Anyone listening — a photographer, a quality inspector, nobody at all — can react to that announcement. The chef doesn't care who's listening or what they do. The chef just cooks.
 
-The important thing hooks do is **separate concerns**: the main logic stays clean, and observability (or any side behavior) lives somewhere else.
+That's a hook.
+
+In software terms: the core system (chef) exposes **announcement points** at key moments. Other code (photographer) can subscribe to those announcements and do whatever it wants — log something, print something, send a metric. The core system doesn't know or care what the subscribers do.
+
+The reason this matters: the chef's workflow stays clean. You can add a photographer, remove the photographer, replace them with a food critic — the cooking doesn't change.
+
+If you've used Git hooks (run a script before every commit), React hooks (run code when a component renders), or even a doorbell (ring when someone arrives — you decide whether to answer), you've already used this pattern.
 
 ### How hooks differ from similar patterns
 
