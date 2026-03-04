@@ -59,6 +59,9 @@ For debug output, hooks are the right fit: we want to observe without changing b
 
 ## What we built
 
+![AgentDojo hooks architecture diagram](/assets/img/agentdojo-hooks-design.svg)
+*Design diagram: core loop emits hook events; hook implementations handle observability concerns.*
+
 We created a small hook interface in `src/hooks.py`:
 
 ```python
