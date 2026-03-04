@@ -10,11 +10,11 @@ We started building an LLM agent the way most people do: give the model some too
 
 It worked. Kind of.
 
-The agent could read files, run shell commands, answer questions about code. But it had a problem we didn't anticipate: **it kept losing track of what it was doing.**
+The agent could read files, run shell commands, answer questions about code. But we saw a practical reliability gap: **multi-step tasks were not consistently guided by an explicit plan.**
 
-Ask it to "read the README, list the source files, and write a summary," and it would read the README, then… write a summary. Skipping step two. Or it would do all three steps but in a random order that produced worse results. Or it would get halfway through and start doing something we never asked for.
+In early iterations, behavior depended heavily on prompting style. Sometimes the agent chained steps in one turn; other times it paused after a partial step and needed another user nudge (for example, a follow-up like “proceed”). That inconsistency pushed us to make planning explicit instead of implicit.
 
-The agent was *acting* fine. It just wasn't *planning*.
+So the issue wasn't “the agent can never act.” The issue was: action quality was okay, but multi-step control was too fragile without a planning contract.
 
 ## The lightbulb moment
 
