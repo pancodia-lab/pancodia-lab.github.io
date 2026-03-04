@@ -49,7 +49,7 @@ The contract between them is simple: planning produces a **structured todo list*
 
 ## Why a todo list (and not something fancier)
 
-To be precise about our actual development path: we did **not** start by evaluating multiple formal plan representations. We first followed the [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) pattern (structured todo list), then iteratively refined it in AgentDojo.
+To be precise about our actual development path: we did **not** start by evaluating multiple formal plan representations. We first followed the [learn-claude-code s03 todo example](https://github.com/shareAI-lab/learn-claude-code/blob/main/agents/s03_todo_write.py) pattern (structured todo list), then iteratively refined it in AgentDojo.
 
 That todo-first choice turned out to be a strong baseline:
 
