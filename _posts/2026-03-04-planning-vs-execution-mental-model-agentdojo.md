@@ -58,7 +58,7 @@ That todo-first choice turned out to be a strong baseline:
 - It's easy to update ("mark step 1 done, move step 2 to in progress")
 - It's easy to explain to the LLM ("here are your remaining tasks")
 
-The constraint that **only one item can be `in_progress`** turned out to be surprisingly powerful. It prevents the agent from "parallel flailing" — starting three things at once and finishing none of them.
+The constraint that **only one item can be `in_progress`** has been practically useful for us so far. It reduces "parallel flailing" risk — starting multiple things at once and finishing none of them.
 
 ## The kitchen counter analogy
 
