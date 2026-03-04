@@ -64,6 +64,9 @@ The constraint that **only one item can be `in_progress`** has been practically 
 
 A metaphor that helped us explain this more clearly is a kitchen setup.
 
+![Kitchen counter analogy for planning in AgentDojo](/assets/img/agentdojo-kitchen-counter-analogy.svg)
+*Recipe card = `TodoManager` plan state. Kitchen counter = `PlanningContext` (plan + capabilities + runtime context).* 
+
 Imagine the planner as someone cooking from a **recipe card**. The card itself is just the plan: what steps exist and what status each step is in. In our code, that role maps to `TodoManager`.
 
 But real cooking needs more than a card — you need a **counter** where all your working context lives: the recipe card, access to tools, and room to adjust as you go. In our code, that broader working surface maps to `PlanningContext` (plan state + LLM calls + tool dispatch + observation logging + drift checks).
