@@ -62,12 +62,13 @@ The constraint that **only one item can be `in_progress`** has been practically 
 
 ## The kitchen counter analogy
 
-We use a metaphor internally that helps us think about the architecture:
+A metaphor that helped us make this separation concrete is a kitchen setup.
 
-- **TodoManager** is the **recipe card**: the structured plan with steps and statuses.
-- **PlanningContext** is the **kitchen counter**: the recipe card *plus* the ability to ask the chef for advice (LLM), use kitchen tools (tool dispatch), write notes (observations), and check the timer (drift guard).
+Imagine the planner as someone cooking from a **recipe card**. The card itself is just the plan: what steps exist and what status each step is in. In our code, that role maps to `TodoManager`.
 
-The planner needs the whole counter to do its job. But the recipe card is what gets passed to the cook (execution layer).
+But real cooking needs more than a card — you need a **counter** where all your working context lives: the recipe card, access to tools, and room to adjust as you go. In our code, that broader working surface maps to `PlanningContext` (plan state + LLM calls + tool dispatch + observation logging + drift checks).
+
+So the planner works with the whole counter, while execution consumes the concrete steps from the card.
 
 This separation means we can swap planning strategies without touching execution. Today we have two:
 
