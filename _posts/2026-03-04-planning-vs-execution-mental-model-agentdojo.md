@@ -64,7 +64,8 @@ The constraint that **only one item can be `in_progress`** has been practically 
 
 A metaphor that helped us explain this more clearly is a kitchen setup.
 
-![Real kitchen counter with cookbook stand](/assets/img/kitchen-counter-real.jpg)
+<img src="/assets/img/kitchen-counter-real.jpg" alt="Real kitchen counter with cookbook stand" width="520" />
+
 *Real-life anchor for the analogy: a recipe on a kitchen counter. (Image source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Cookbook_stand_in_kitchen_on_counter_with_cutting_board_and_knife_with_basil_leaves_(18501227740).jpg))*
 
 Imagine the planner as someone cooking from a **recipe card**. The card itself is just the plan: what steps exist and what status each step is in. In our code, that role maps to `TodoManager`.
