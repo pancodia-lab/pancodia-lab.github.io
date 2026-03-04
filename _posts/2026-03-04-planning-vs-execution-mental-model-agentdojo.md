@@ -78,7 +78,7 @@ This separation means we can swap planning strategies without touching execution
 ### Strategy 1: Todo planning (baseline)
 The simplest approach. We rely on the system prompt to tell the model: "If this is a multi-step task, create a todo list first." The planner itself is essentially a no-op — it trusts the LLM to plan.
 
-This works surprisingly well for simple tasks.
+In our current implementation, this is a practical baseline for simple tasks.
 
 ### Strategy 2: ToT-lite (planning-only branching)
 For harder tasks, we wanted something smarter. Inspired by Tree of Thoughts, we built a lightweight planning-time search:
