@@ -134,12 +134,16 @@ This is a good example of why the separation pays off: “drift handling” is p
 
 The separation has a security benefit we didn't fully appreciate at first.
 
-Execution is where the dangerous things happen: shell commands, file writes, network calls. By keeping execution constrained and auditable, we can enforce safety gates without worrying about planning logic interfering.
+Execution is where the dangerous things happen: shell commands, file reads, and (eventually) network calls. In AgentDojo we try to make execution **constrained by default** and **reviewable**.
 
-In AgentDojo:
+In AgentDojo today:
 - `run_bash` requires explicit human approval and runs in a Docker sandbox (no network, non-root user, 30-second timeout)
-- `read_file` is read-only and blocks path traversal
-- Planning *cannot bypass* these constraints because planning and execution communicate only through the todo list
+- `read_file` is read-only and blocks path traversal outside the repo
+- tool calls + tool results are recorded in the session trace (conversation history + optional Rich debug panels)
+
+What we *don’t* have yet (so we shouldn’t overclaim): a durable, tamper-evident audit log or deterministic replay. Those are planned upgrades.
+
+Planning *cannot bypass* execution constraints because planning and execution communicate only through the plan contract + tool interface.
 
 This is a much easier security story than "the LLM can do anything and we hope the prompt tells it not to."
 
@@ -160,6 +164,15 @@ If you're building an agent and you take away one architectural idea, let it be 
 **Separate planning from execution. Use a simple, inspectable plan representation. Keep execution constrained and auditable.**
 
 You can start with the simplest possible planner (a no-op that trusts the LLM). You can upgrade to smarter planning later. The important thing is drawing the line early, because it's much harder to separate them after they're tangled together.
+
+## References (papers & ideas we’re leaning on)
+
+Planning/execution separation and agent loops are heavily inspired by a few foundational papers:
+
+- ReAct (reasoning + acting): https://arxiv.org/abs/2210.03629
+- Plan-and-Solve (plan-first prompting): https://arxiv.org/abs/2305.04091
+- Tree of Thoughts (search over plans/thoughts): https://arxiv.org/abs/2305.10601
+- Reflexion (self-reflection for iterative improvement): https://arxiv.org/abs/2303.11366
 
 ---
 
