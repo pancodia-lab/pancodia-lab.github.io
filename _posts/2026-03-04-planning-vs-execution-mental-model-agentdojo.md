@@ -102,15 +102,33 @@ PLANNING_MODE="tot_lite"  # planning-only branching
 
 ## The drift problem (and how separation helped us solve it)
 
-Even with good plans, agents drift. The model gets distracted by something in a tool result, or it "forgets" the plan exists.
+Here’s what “drift” looks like in our actual AgentDojo loop.
 
-Because planning and execution are separated, we could add a **drift guard** cleanly:
+A typical turn is:
 
-- The planner tracks how many tool calls have happened since the last todo update.
-- After 3 non-todo tool calls, it injects a gentle reminder: "Update your todo list."
-- This is a planning concern, so it lives in the planner — not in the execution loop.
+LLM → tool call → observation → LLM → tool call → …
 
-If we'd mixed planning and execution together, adding drift detection would have meant scattering counter variables and reminder logic throughout the main loop. Instead, it's a few lines inside the planner class.
+That’s powerful (it lets the agent finish multi-step tasks in one user turn), but it has a side effect: the model can start reacting to the *latest* tool output and slowly lose the “plan anchor.” In practice, that can look like:
+
+- continuing to call `read_file` repeatedly because the last file mentioned another file
+- taking more steps without updating the todo state, so the todo no longer matches reality
+
+We addressed this with a small, very specific guardrail that matches our architecture:
+
+- In both `TodoPlanner` and `ToTLitePlanner`, we maintain an internal counter (`_rounds_since_todo`).
+- After each tool call:
+  - if the tool was `todo`, we reset the counter to 0
+  - otherwise we increment it
+- If we hit a threshold (today: `reminder_every=3`) without a `todo` update, the planner injects a **reminder observation**:
+  - "Update your todo list if this is a multi-step task."
+
+Two important implementation details that make this clean:
+
+1) The drift guard lives in the **planner** (`before_tool`/`after_tool` hooks), not in `main.py`. The execution loop stays simple and doesn’t accumulate “planning policy” branches.
+
+2) The reminder is injected as an **observation** (via `ctx.add_observation(...)`), so it becomes part of the next LLM context without requiring a special control channel.
+
+This is a good example of why the separation pays off: “drift handling” is planning policy, so we can evolve it (thresholds, smarter triggers, verification) without destabilizing execution.
 
 ## Why this matters for safety
 
