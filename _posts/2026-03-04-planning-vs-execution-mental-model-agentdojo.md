@@ -49,7 +49,9 @@ The contract between them is simple: planning produces a **structured todo list*
 
 ## Why a todo list (and not something fancier)
 
-We considered more sophisticated plan representations — dependency graphs, hierarchical task networks, formal plan languages. But we kept coming back to the humble todo list:
+To be precise about our actual development path: we did **not** start by evaluating multiple formal plan representations. We first followed the learn-claude-code pattern (structured todo list), then iteratively refined it in AgentDojo.
+
+That todo-first choice turned out to be a strong baseline:
 
 - It's easy to inspect ("what is the agent planning to do?")
 - It's easy to validate ("is exactly one item in progress?")
