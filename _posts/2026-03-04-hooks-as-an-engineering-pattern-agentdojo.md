@@ -30,6 +30,9 @@ Within a day, the terminal output looked like someone had dumped a log file into
 
 We needed a better pattern.
 
+![AgentDojo debug panels demo](/assets/img/agentdojo-hooks-demo.svg)
+*Demo of collapsed planning/tool panels generated from our AgentDojo debug flow.*
+
 ## The insight: hooks are just "tell me when something happens"
 
 Think about a restaurant kitchen. The head chef runs the line: prep, cook, plate. That's the core loop. Now imagine the restaurant also wants a food photographer to snap pictures of each dish before it goes out.
