@@ -30,9 +30,6 @@ Within a day, the terminal output looked like someone had dumped a log file into
 
 We needed a better pattern.
 
-![AgentDojo debug panels demo](/assets/img/agentdojo-hooks-demo.svg)
-*Demo of collapsed planning/tool panels generated from our AgentDojo debug flow.*
-
 ## The insight: hooks are just "tell me when something happens"
 
 Think about a restaurant kitchen. The head chef runs the line: prep, cook, plate. That's the core loop. Now imagine the restaurant also wants a food photographer to snap pictures of each dish before it goes out.
@@ -100,6 +97,9 @@ With hooks in place, improving the output format became a localized change. We s
 - One collapsed **"Planning"** panel per user turn (all planning logs buffered, then rendered together)
 - A **"Tool call → read_file"** panel with syntax-highlighted JSON
 - A **"Tool result ← read_file"** panel with pretty-printed output
+
+![AgentDojo debug panels demo](/assets/img/agentdojo-hooks-demo.svg)
+*Demo of collapsed planning/tool panels generated from our AgentDojo debug flow.*
 
 The terminal went from a noisy stream of debug lines to something that actually helped us think.
 
