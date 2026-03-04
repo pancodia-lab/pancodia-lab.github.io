@@ -91,7 +91,7 @@ For harder tasks, we wanted something smarter. Inspired by Tree of Thoughts, we 
 5. Refine them once (ask the LLM to improve them)
 6. Pick the best
 
-This is bounded: at most ~4 LLM calls, always converges, always produces a valid todo list. The branching happens *only* in planning. Execution stays single-trajectory.
+This controller is bounded in the current implementation: up to 4 planning LLM calls in the full path (propose, score, refine, choose), with earlier fallback on parse/validation failures. So runtime terminates predictably, but plan quality is not theoretically guaranteed. The branching happens *only* in planning. Execution stays single-trajectory.
 
 We can switch between strategies with one environment variable:
 
