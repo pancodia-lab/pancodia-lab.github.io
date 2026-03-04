@@ -1,125 +1,138 @@
 ---
 layout: post
-title: "Hooks Are an Engineering Pattern (and Why We Used Them in AgentDojo)"
+title: "Our Debug Output Was a Mess — Hooks Fixed It Without Touching the Core Loop"
 date: 2026-03-04
 categories: [engineering, architecture, agents]
 tags: [hooks, design-patterns, observability, agentdojo, python]
 ---
 
-Hooks show up everywhere in real software: build systems, web frameworks, game engines, CLIs, IDE plugins—basically anywhere a core system wants to stay stable while still allowing behavior to be extended.
+We're building an LLM agent from scratch — not using a framework, not wrapping LangChain, just Python and curiosity. The project is called **AgentDojo**, and the goal is to understand every layer by building it ourselves: tool execution, planning, memory, safety.
 
-In this post I’ll explain **hooks as a pattern**, then walk through a concrete example from **AgentDojo** (our “build an agent from zero to hero” project): we used hooks to make debug/observability pluggable without turning the main agent loop into a pile of print statements.
+A few weeks in, we hit a familiar problem: **our debug output was unreadable.**
 
-## 1) What is a hook?
-A **hook** is a *well-defined callback point* exposed by a core system.
+## The mess
 
-- The core system runs the main logic.
-- At specific moments (events), it calls hook methods.
-- Hook implementations can *observe* or *extend* behavior.
+Our agent has an inner loop that chains multiple tool calls in one turn. The model says "read this file," we execute it, feed back the result, the model says "now read that file," and so on until it produces a final answer.
 
-Importantly: the core system chooses **when** hooks fire. Hook implementers choose **what** to do when they fire.
+During development, we needed to see what was happening: which tool got called, what the model returned, whether the planner triggered, what scores it assigned to candidate plans.
 
-### Hook vs “plugin” vs “middleware”
-These terms overlap, but here’s a useful mental distinction:
+So we did what everyone does first: we added `print()` statements.
 
-- **Hook**: “I will notify you when X happens.” (callback/event surface)
-- **Plugin**: a packaged unit of functionality (often built on hooks)
-- **Middleware**: a chain that intercepts and can modify a request/response (more invasive)
+```python
+# in main.py, scattered everywhere
+print(f"[debug] Tool call: {tool_name} args={args}")
+print(f"[debug] Result: {result}")
+print(f"[debug] Planner triggered: tot_lite")
+print(f"[debug] Plans proposed: 3, filtered: 3")
+```
 
-AgentDojo uses hooks mainly for **observability**: print structured debug output without changing behavior.
+Within a day, the terminal output looked like someone had dumped a log file into a blender. Debug lines were interleaved with agent responses, tool results were unformatted walls of text, and half the prints were guarded by `if DEBUG:` checks that we kept forgetting to add.
 
-## 2) Why hooks are useful
-Hooks solve a classic tension:
+We needed a better pattern.
 
-- You want the **core loop** to be simple, readable, and safe.
-- You still want flexibility: logs, traces, metrics, debug UIs, audits.
+## The insight: hooks are just "tell me when something happens"
 
-If you hardcode debug output into core logic, you get:
+If you've used Git hooks, React hooks, or WordPress hooks, you already know the core idea — even if those implementations look very different from each other.
 
-- tangled code paths
-- duplicated printing
-- inconsistent formatting
-- harder testing
+A **hook** is a callback point that the core system exposes. The core system decides **when** to call it. The hook implementation decides **what** to do.
 
-Hooks let you keep one clean orchestrator and swap in different “views.”
+That's it. No magic.
 
-## 3) AgentDojo example: tool-call tracing without clutter
-AgentDojo has an inner loop that can do multiple consecutive tool calls in one user turn:
+The important thing hooks do is **separate concerns**: the main logic stays clean, and observability (or any side behavior) lives somewhere else.
 
-LLM → tool call → execute tool → observation → LLM → …
+### How hooks differ from similar patterns
 
-We want to observe that process during development. But we do **not** want to bake debug output into every branch of `main.py`.
+This tripped us up initially, so it's worth clarifying:
 
-So we added a hook interface (`src/hooks.py`) roughly like:
+- **Hook**: "I will notify you when X happens." The core system owns the timeline. You just react.
+- **Middleware**: "I will intercept your request/response and can modify it." More invasive — the middleware is *in* the data path.
+- **Plugin**: a packaged unit of functionality, often built *on top of* hooks.
+- **Strategy**: "I will delegate a *decision* to you." The core system uses your return value.
 
-- `on_tool_call_detected(...)`
-- `on_tool_request(...)`
-- `on_tool_result(...)`
+For debug output, hooks are the right fit: we want to observe without changing behavior.
 
-And a `NullHooks` implementation that does nothing.
+## What we built
 
-Then `main.py` becomes something like:
+We created a small hook interface in `src/hooks.py`:
 
-1. run LLM
-2. parse tool call
-3. call hooks
-4. execute tool
-5. call hooks
+```python
+class AgentHooks(Protocol):
+    def on_tool_call_detected(self, *, raw_text, tool, args) -> None: ...
+    def on_tool_result(self, *, tool, result) -> None: ...
+    def on_planning_log(self, *, text) -> None: ...
+    def on_planning_flush(self) -> None: ...
+```
 
-The key point: **the agent still behaves the same** regardless of hooks.
+And two implementations:
 
-## 4) A good hook rule: “hooks should be side-effect-only”
-A common failure mode is letting hooks change state.
+- **`NullHooks`**: does nothing. Used when debug is off. Zero overhead, zero noise.
+- **`DebugToolCallsHooks`**: pretty-prints everything using Rich panels.
 
-In AgentDojo we treat hooks as:
-- logging/printing only
-- no mutation of agent state
-- no decisions
+The agent loop in `main.py` calls hooks at specific moments:
 
-Why? Because once hooks can change behavior, debugging becomes chaotic:
+```python
+# After parsing a tool call
+hooks.on_tool_call_detected(raw_text=response, tool=name, args=args)
 
-> “Was that outcome caused by the agent logic or by a hook?”
+# After executing the tool
+hooks.on_tool_result(tool=name, result=result)
 
-If you *do* want extensibility that changes behavior, you usually want a different mechanism (a policy engine, middleware chain, or strategy interface).
+# During planning (buffered, printed as one block)
+hooks.on_planning_log(text="ToTLitePlanner: chose plan 0")
+hooks.on_planning_flush()  # → renders a single "Planning" panel
+```
 
-## 5) Hooks + aesthetics: collapsed debug panels
-In early development we printed raw debug lines and it got messy.
+The key property: **remove all hooks, and the agent behaves identically.** Hooks are observation-only.
 
-Because we already use **Rich** in the CLI, we upgraded hook output to use Rich Panels:
+## The aesthetic upgrade: collapsed panels
 
-- a single collapsed **Planning** panel per user turn
-- a panel for each **Tool call** (syntax highlighted JSON)
-- a panel for each **Tool result** (pretty printed)
+With hooks in place, improving the output format became a localized change. We switched from inline `print()` to Rich panels:
 
-This dramatically improves readability while keeping the core loop unchanged.
+- One collapsed **"Planning"** panel per user turn (all planning logs buffered, then rendered together)
+- A **"Tool call → read_file"** panel with syntax-highlighted JSON
+- A **"Tool result ← read_file"** panel with pretty-printed output
 
-## 6) When to use hooks (practical checklist)
-Use hooks when:
+The terminal went from a noisy stream of debug lines to something that actually helped us think.
 
-- you need observability
-- you need optional features (debug UI, audit logs)
-- you need extension points but want to keep the core stable
+And crucially: we made this change by editing *one file* (`hooks.py`). The core loop didn't change at all.
 
-Avoid hooks when:
+## A rule we learned: hooks should not change state
 
-- you need to change control flow (use strategies/state machines)
-- ordering and composition are the main point (use middleware)
+Early on, we considered letting hooks influence behavior — maybe a hook could skip a tool call, or modify the observation before it goes back to the LLM.
 
-## 7) Takeaway
-Hooks are a simple but powerful pattern:
+We decided against it. Here's why:
 
-- expose event points
-- keep the core loop clean
-- make observability pluggable
+Once hooks can change state, you lose the ability to reason about behavior from the core loop alone. Debugging becomes:
 
-In AgentDojo, hooks let us iterate quickly on debugging and trace aesthetics **without** making the agent loop brittle.
+> "Is this happening because of the agent logic, or because of something a hook did?"
+
+If you need behavior changes, use a different mechanism: a strategy pattern (for decisions), a middleware chain (for request/response modification), or a policy engine (for rules). Keep hooks side-effect-only.
+
+## When to use hooks (and when not to)
+
+**Good fit:**
+- Logging, tracing, metrics
+- Debug UIs
+- Audit trails
+- Optional notifications
+
+**Not a good fit:**
+- Changing control flow → use strategies or state machines
+- Intercepting and modifying data → use middleware
+- Core business logic → just put it in the core
+
+## What we'd do differently
+
+If we were starting over, we'd define the hook surface *before* writing the first `print()`. It's much easier to add hooks early than to extract them from scattered debug code later.
+
+We'd also add a `on_turn_start` / `on_turn_end` pair from the beginning — it makes it trivial to measure turn duration, count tool calls per turn, and build session summaries.
+
+## Takeaway
+
+Hooks are one of those patterns that feel too simple to be worth naming. But naming it — and committing to the constraint that hooks don't change behavior — gave us a clean separation between "what the agent does" and "how we observe it."
+
+If you're building an agent (or any system with a main loop and optional observability), hooks are a great first architectural decision.
 
 ---
 
-**Project:** AgentDojo (private org repo)
-
-If you’re building your own agent, a good first hook surface is:
-- tool call detected
-- tool execution started
-- tool execution finished
-- planning started/finished
+*This post is part of the [AgentDojo](https://github.com/pancodia-lab/agent-dojo) series — building an LLM agent from zero to hero, grounded in research and engineering discipline.*
