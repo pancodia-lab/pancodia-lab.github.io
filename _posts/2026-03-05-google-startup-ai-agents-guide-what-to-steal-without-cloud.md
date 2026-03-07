@@ -53,9 +53,17 @@ In short, statefulness is what turns a sequence of independent LLM calls into a 
 
 ### 1.2 Three engagement paths
 
-Teams can engage with agents in three ways: **build** custom agents, **use** prebuilt agents, or **bring in partner** agents via open interoperability protocols (MCP, A2A). The guide emphasizes that:
+Teams can engage with agents in three ways, and the guide emphasizes that all three are underpinned by open interoperability:
 
 > "Google Cloud supports the comprehensive development of agentic systems, whether you're building your own agents, using pre-built Google Cloud agents, or bringing in partner agents. Underpinned by the Model Context Protocol (MCP) and Agent2Agent (A2A) protocol, this common framework is designed for interoperability." (p. 4)
+
+**Path 1: Build your own agents.** This path is for teams that need maximum control over agent behavior. The guide presents two sub‑options. The first is a **code‑first approach** (ADK), described as best "for developers, technical startups, and teams that require a high degree of control over agent behavior" (p. 5). ADK provides orchestration logic, tool definition and registration, context management, evaluation and observability, containerization, and multi‑agent composition (p. 5). The second is an **application‑first approach** (Agentspace), which "empowers non-technical team members to build custom agents using a no-code designer" (p. 6) for teams that need to scale agent usage across an organization without consuming engineering resources.
+
+**Path 2: Use prebuilt agents.** For teams with limited engineering resources or standard use cases, prebuilt managed agents offer rapid prototyping: "managed agents let you focus on core business logic rather than managing infrastructure" (p. 6). The guide highlights Gemini Code Assist as an example — an AI‑powered assistant that "integrates into multiple points of the software development lifecycle, providing assistance through IDE extensions, a command-line interface, GitHub integration, and within various Google Cloud services" (p. 6). Gemini Cloud Assist is another example, providing "context-aware assistance for infrastructure management and application operations" (p. 7).
+
+**Path 3: Bring in partner agents.** For specialized use cases, teams can "integrate third-party or open-source agents into your stack using Google Cloud's open ecosystem and via the Google Cloud Marketplace" (p. 8). The guide points to Agent Garden for deploying "pre-built ADK agents that already support data reasoning and inter-agent collaboration" (p. 8), noting that you can "mix and match them with the agents you build, speeding up time to impact" (p. 8). This path relies heavily on the MCP and A2A protocols for interoperability.
+
+The key insight across all three paths is that agents are compositional: a production system may combine custom‑built agents (Path 1) with prebuilt agents (Path 2) and third‑party specialists (Path 3), all communicating via standardized protocols.
 
 ---
 
