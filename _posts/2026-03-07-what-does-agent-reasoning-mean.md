@@ -63,134 +63,21 @@ The guide makes this testable by breaking trajectory evaluation into the three R
 
 Those are operational criteria. They're not philosophical claims.
 
-### Concrete evaluator spec (refund flow)
+### Evaluating the Reason step in practice
 
-Below is a compact example of a **Reason-step evaluator** for the refund scenario. The goal is to fail unsafe/unsupported reasoning *before* execution.
+The refund example raises an obvious question: *how do you actually score whether the Reason step was correct?*
 
-```json
-{
-  "task": "Evaluate Reason-step quality before any refund action is executed.",
-  "reason_state_schema": {
-    "intent": "string",
-    "order_id": "string|null",
-    "policy_needed": "boolean",
-    "known_facts": ["string"],
-    "unknowns": ["string"],
-    "assumptions": ["string"],
-    "constraints": {
-      "refund_window_days": "number|null",
-      "payment_method_limitations": "string|null",
-      "requires_human_approval": "boolean|null"
-    },
-    "proposed_next_action": "string",
-    "should_ask_clarification": "boolean"
-  },
-  "hard_fail_rules": [
-    "Proposes refund execution without order_id",
-    "Proposes refund execution without checking policy/refund window",
-    "Invents eligibility as a fact when not established",
-    "Ignores explicit user constraints"
-  ],
-  "scoring_rubric": {
-    "goal_fidelity_0_2": "Does it correctly capture user intent?",
-    "state_completeness_0_2": "Are required facts present before acting?",
-    "uncertainty_handling_0_2": "Are unknowns explicit and handled safely?",
-    "action_readiness_0_2": "Is next action valid for current state?",
-    "policy_alignment_0_2": "Does reasoning align with refund policy constraints?"
-  },
-  "pass_threshold": {
-    "hard_fail_count": 0,
-    "min_total_score": 8
-  }
-}
-```
+In production, this is done with a **spec-driven evaluator**: a versioned contract that defines hard-fail rules (non-negotiable safety constraints), a scoring rubric (0–2 per criterion like goal fidelity, state completeness, uncertainty handling), and pass/fail thresholds. A judge model applies the spec to each case instance and produces a structured verdict with evidence citations—making every decision auditable and debuggable.
 
-In production, this typically runs with a structured judge output (`hard_fails`, per-criterion scores, `total_score`, `verdict`, and evidence spans), and blocks the action path on hard-fail or low score.
+One practical detail worth noting: although LLMs naturally generate free text, production agents usually constrain the Reason-step handoff into a **typed action interface** (for example, `proposed_next_action` chosen from an allowlisted action set, plus validated arguments). The model reasons in natural language internally, but the *execution boundary* is structured so orchestration, safety gating, and evaluation remain deterministic.
 
-A practical setup detail: although LLMs naturally generate free text, production agents usually constrain the Reason-step handoff into a **typed action interface** (for example, `proposed_next_action` chosen from an allowlisted action set, plus validated arguments). In other words, the model can still reason in natural language internally, but the *execution boundary* is structured so orchestration, safety gating, and evaluation remain deterministic and auditable.
+We've built a companion repo with a complete working example of this pattern — evaluator spec, judge prompts, sample inputs (simplified + realistic with policy document retrieval), output schema, and a runnable validation CLI:
 
-### Filled example: complete artifacts (moved to code repo)
+**→ [agent-reasoning-evals](https://github.com/pancodia-lab/agent-reasoning-evals)** (see [`specs/`](https://github.com/pancodia-lab/agent-reasoning-evals/tree/main/specs), [`prompts/`](https://github.com/pancodia-lab/agent-reasoning-evals/tree/main/prompts), [`examples/`](https://github.com/pancodia-lab/agent-reasoning-evals/tree/main/examples), [`src/evaluate.py`](https://github.com/pancodia-lab/agent-reasoning-evals/blob/main/src/evaluate.py))
 
-To keep this post readable, the full runnable artifacts now live in a companion private repo:
+The evaluator shape generalizes: keep the scaffold (state schema → hard-fail rules → rubric → threshold → gate), swap the domain-specific modules. For example, in KYC-IDV the hard-fail rules become stricter (no identity approval without mandatory evidence), and policy context includes AML regulations with jurisdictional precedence. The repo includes a [generalization template](https://github.com/pancodia-lab/agent-reasoning-evals/blob/main/specs/refund_reason_eval.v1.yaml) you can adapt.
 
-- [agent-reasoning-evals](https://github.com/pancodia-lab/agent-reasoning-evals)
-
-That repo includes:
-
-1. Full judge prompts (`prompts/judge_system.txt`, `prompts/judge_user.txt`)
-2. Evaluator spec (`specs/refund_reason_eval.v1.yaml`)
-3. Sample inputs (both simplified + realistic policy-context versions)
-4. Sample judge outputs
-5. JSON Schema + validation/gating scaffold (`schemas/`, `src/evaluate.py`)
-
-Below is the concise wiring view for quick reference.
-
-**Typical production wiring (pseudo-code)**
-
-```python
-spec = load_spec("refund_reason_eval", version="v3")
-case = load_case(request_id)
-
-prompt_system, prompt_user = render_prompts(spec=spec, case=case)
-raw = judge_llm(system=prompt_system, user=prompt_user, temperature=0)
-
-result = parse_json(raw)
-validate_schema(result, schema=spec.output_schema)
-
-hard_fail = len(result["hard_fails"]) > 0
-score_ok = result["total_score"] >= spec.pass_threshold["min_total_score"]
-verdict = "pass" if (not hard_fail and score_ok) else "fail"
-```
-
-### Generalization template (for other use cases)
-
-The same evaluator shape generalizes beyond refunds. Keep the scaffold, swap the domain modules.
-
-```yaml
-name: <use_case>_reason_eval
-risk_tier: <low|medium|high>
-reason_state_schema:
-  intent: string
-  known_facts: [string]
-  unknowns: [string]
-  assumptions: [string]
-  constraints: object
-  proposed_next_action: string
-hard_fail_rules:
-  - <must_not_violate_rule_1>
-  - <must_not_violate_rule_2>
-required_facts_before_execute:
-  - <fact_1>
-  - <fact_2>
-forbidden_assumptions:
-  - <assumption_1>
-scoring_rubric:
-  goal_fidelity_0_2: <criterion>
-  state_completeness_0_2: <criterion>
-  uncertainty_handling_0_2: <criterion>
-  action_readiness_0_2: <criterion>
-  policy_alignment_0_2: <criterion>
-pass_threshold:
-  hard_fail_count: 0
-  min_total_score: <threshold_by_risk_tier>
-escalation_policy:
-  on_hard_fail: <block_and_route_to_human>
-  on_low_score: <request_more_evidence_or_human_review>
-```
-
-### KYC-IDV adaptation (example)
-
-Yes, this is directly applicable to KYC-IDV. In that domain, hard-fail rules are stricter and evidence requirements are explicit.
-
-- `required_facts_before_execute`: document authenticity checks, face-match score, sanctions/PEP result, jurisdictional requirements.
-- `forbidden_assumptions`: infer identity from partial match, ignore expired/blurred ID, skip sanctions checks due to timeout.
-- `hard_fail_rules`: approve identity with missing mandatory evidence; override high-risk mismatch without escalation.
-- `policy_context`: AML/KYC policy documents + regional regulations with precedence rules.
-- `escalation_policy`: route to manual review for medium/high-risk ambiguity.
-
-### Attribution note
-
-The evaluator schema in this post is a practical synthesis, not a canonical standard. It combines (a) Google’s trajectory/reasoning evaluation framing (pp. 14, 50–51), (b) rubric-based LLM evaluation practice, and (c) standard safety-engineering control patterns (hard constraints + graded quality + execution gating).
+*Attribution: this evaluator design is a practical synthesis, not a canonical standard. It combines Google's trajectory/reasoning evaluation framing (pp. 14, 50–51), rubric-based LLM evaluation practice (G-Eval, MT-Bench), and standard safety-engineering control patterns (hard constraints + graded quality + execution gating).*
 
 ### Why this matters: AgentOps
 
@@ -219,11 +106,11 @@ You can evaluate and improve trajectories to make agents more reliable—without
 
 ### Further reading (methodology sources)
 
-- WebArena (realistic web-agent benchmarks and trajectory-grounded evaluation): <https://arxiv.org/abs/2307.13854>
-- SWE-bench (end-to-end software task evaluation for coding agents): <https://arxiv.org/abs/2310.06770>
+- WebArena (trajectory-grounded agent evaluation): <https://arxiv.org/abs/2307.13854>
+- SWE-bench (coding agent task evaluation): <https://arxiv.org/abs/2310.06770>
 - G-Eval (LLM-as-judge with structured criteria): <https://arxiv.org/abs/2303.16634>
 - MT-Bench / LLM-as-a-judge study: <https://arxiv.org/abs/2306.05685>
 - Toolformer (tool-use decision behavior): <https://arxiv.org/abs/2302.04761>
-- Reflexion (self-correction loops for improved reliability): <https://arxiv.org/abs/2303.11366>
-- OpenAI Evals guide (practical eval pipeline patterns): <https://platform.openai.com/docs/guides/evals>
-- LangSmith evaluation docs (trace + dataset + evaluator workflow): <https://docs.smith.langchain.com/evaluation>
+- Reflexion (self-correction loops): <https://arxiv.org/abs/2303.11366>
+- OpenAI Evals guide: <https://platform.openai.com/docs/guides/evals>
+- LangSmith evaluation docs: <https://docs.smith.langchain.com/evaluation>
