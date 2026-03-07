@@ -318,6 +318,38 @@ Instructions:
 
 This kind of artifact makes trajectory evaluation auditable: reviewers can inspect what was scored, why it passed/failed, and which evidence justified the verdict.
 
+**Typical production wiring (pseudo-code)**
+
+```python
+spec = load_spec("refund_reason_eval", version="v3")
+case = load_case(request_id)
+
+prompt_system, prompt_user = render_prompts(spec=spec, case=case)
+raw = judge_llm(system=prompt_system, user=prompt_user, temperature=0)
+
+result = parse_json(raw)
+validate_schema(result, schema=spec.output_schema)
+
+hard_fail = len(result["hard_fails"]) > 0
+score_ok = result["total_score"] >= spec.pass_threshold["min_total_score"]
+
+verdict = "pass" if (not hard_fail and score_ok) else "fail"
+
+if verdict == "pass":
+    allow_next_action(case)
+else:
+    block_and_route(case, reason=result)
+
+log_eval_artifacts({
+    "spec_version": spec.version,
+    "prompt_hash": hash_prompts(prompt_system, prompt_user),
+    "model": "judge-model-name",
+    "input": case,
+    "result": result,
+    "verdict": verdict
+})
+```
+
 ### Why this matters: AgentOps
 
 If "reasoning" is behavioral, improving it is mostly an engineering problem: better tool contracts, better grounding, better state handling, better constraints, and better evaluation harnesses. This is why the guide is blunt about avoiding "vibes":
