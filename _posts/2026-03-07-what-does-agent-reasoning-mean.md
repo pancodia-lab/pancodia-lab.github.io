@@ -47,7 +47,7 @@ Calling step (1) "Reason" does not imply there's a mind thinking. It means the s
 ![Trajectory evaluation loop for agent reasoning](/assets/img/trajectory-evaluation-loop.svg)
 *Figure: ReAct trajectory with evaluation checkpoints at each step (Reason, Act, Observe) and explicit stop/iterate decision.*
 
-One thing worth noting here: natural-language "thought traces" (chain-of-thought text) can appear in logs and look like evidence of "thinking." They *can* help debugging, but **they're not ground truth**. The more reliable signal is the **observable trajectory** — tool calls, tool I/O, and resulting state transitions. Natural-language thoughts are a debug artifact that can be incomplete or misleading.
+One thing worth noting here: natural-language "thought traces" (chain-of-thought text) can appear in logs and look like evidence of "thinking." They *can* help debugging, but **they're not ground truth**. The more reliable signal is the **observable trajectory** — tool calls, tool I/O, and resulting state transitions. **Natural-language thoughts are a debug artifact that can be incomplete or misleading.**
 
 ### A concrete example
 
