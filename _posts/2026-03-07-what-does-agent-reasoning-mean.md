@@ -87,3 +87,14 @@ You can evaluate and improve trajectories to make agents more reliable—without
 
 - Google, *Startup technical guide: AI agents* (primary): <https://services.google.com/fh/files/misc/startup_technical_guide_ai_agents_final.pdf>
 - ReAct: <https://arxiv.org/abs/2210.03629>
+
+### Further reading (methodology sources)
+
+- WebArena (realistic web-agent benchmarks and trajectory-grounded evaluation): <https://arxiv.org/abs/2307.13854>
+- SWE-bench (end-to-end software task evaluation for coding agents): <https://arxiv.org/abs/2310.06770>
+- G-Eval (LLM-as-judge with structured criteria): <https://arxiv.org/abs/2303.16634>
+- MT-Bench / LLM-as-a-judge study: <https://arxiv.org/abs/2306.05685>
+- Toolformer (tool-use decision behavior): <https://arxiv.org/abs/2302.04761>
+- Reflexion (self-correction loops for improved reliability): <https://arxiv.org/abs/2303.11366>
+- OpenAI Evals guide (practical eval pipeline patterns): <https://platform.openai.com/docs/guides/evals>
+- LangSmith evaluation docs (trace + dataset + evaluator workflow): <https://docs.smith.langchain.com/evaluation>
