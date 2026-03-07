@@ -107,6 +107,8 @@ Below is a compact example of a **Reason-step evaluator** for the refund scenari
 
 In production, this typically runs with a structured judge output (`hard_fails`, per-criterion scores, `total_score`, `verdict`, and evidence spans), and blocks the action path on hard-fail or low score.
 
+A practical setup detail: although LLMs naturally generate free text, production agents usually constrain the Reason-step handoff into a **typed action interface** (for example, `proposed_next_action` chosen from an allowlisted action set, plus validated arguments). In other words, the model can still reason in natural language internally, but the *execution boundary* is structured so orchestration, safety gating, and evaluation remain deterministic and auditable.
+
 ### Filled example: complete judge prompts + input/output
 
 To make this concrete, here is a minimal end-to-end example with the full judge prompt pair.
