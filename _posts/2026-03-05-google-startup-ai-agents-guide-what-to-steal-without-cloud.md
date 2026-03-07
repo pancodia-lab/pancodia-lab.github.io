@@ -87,6 +87,8 @@ Reasoning tokens are presented as a configurable lever:
 
 > "By allocating more reasoning tokens to a specific call, a developer can direct the model to expend more computational effort, directly trading a predictable increase in latency and cost for a potential increase in accuracy." (p. 10)
 
+*Practical interpretation:* In day‑to‑day engineering terms, this is a **compute budget knob** on a single response. Increasing the reasoning budget typically allows the model to spend more internal steps on planning/checking before it produces the final answer. In agentic settings, this often shows up as (a) more careful decomposition of the problem, (b) more consistent tool selection/parameter generation, and (c) fewer “jump to answer” failures—at the cost of higher latency and token spend. Even without an explicit knob, teams often approximate “more reasoning” by adding extra verification steps in the agent loop (retrieve → re‑rank → validate → answer), which similarly increases cost/latency to improve reliability.*
+
 A critical distinction is drawn between fine‑tuning and grounding:
 
 > "Fine-tuning is not grounding. Fine-tuning adapts a model's style and refines its knowledge on a specific task. Grounding connects the model to real-time, verifiable data sources to ensure its responses are factually accurate." (p. 11)
