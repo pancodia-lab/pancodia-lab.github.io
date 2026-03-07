@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Google's 64-Page AI Agents Guide — A Product-Neutral Technical Brief"
+title: "I Read Google's 64-Page AI Agents Guide — Here's the Product-Neutral Playbook (and What We're Stealing)"
 date: 2026-03-05
 categories: [agents, architecture, agentops]
-tags: [agents, react, rag, evaluation, agentops, reliability, planning, grounding, memory]
+tags: [agents, react, rag, evaluation, agentops, reliability, planning]
 ---
 
 # AI Agents: A Technical Brief
@@ -144,6 +144,8 @@ The runtime handles production deployment concerns:
 > "Deploying a functional agent prototype into a production environment requires a robust runtime infrastructure. The runtime facilitates agent deployment at scale, turning a prototype into a reliable product that handles complex operational requirements like security, load balancing, and error handling, especially during periods of unpredictable user growth." (p. 16)
 
 Core runtime capabilities include scalability, security, and reliability/observability (p. 16).
+
+*Note:* In current production stacks, the most commonly adopted runtime choices are **Temporal** (durable workflow orchestration), **LangGraph** (agent-state runtime), and managed cloud runtimes such as **Google Vertex AI Agent Builder/ADK**, **AWS Bedrock Agents**, and **Azure AI Agent Service**. In practice, teams choose between maximum control (Temporal + custom loop) and fastest managed path (cloud-hosted agent runtime).
 
 ---
 
