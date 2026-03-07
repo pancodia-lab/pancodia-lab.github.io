@@ -81,7 +81,7 @@ At the system level, the guide advocates heterogeneous model assignment:
 
 > "Robust cognitive architectures employ multiple specialized agents, each dynamically selecting the leanest model for its specific sub-task. This ensures, for instance, that a heavyweight model is reserved for complex reasoning, while a lightweight model handles routine queries. This multi-agent approach provides the architectural flexibility to optimize the cost and performance of the entire system, not just a single component." (p. 9)
 
-*Note: The guide uses "cognitive architecture" informally to describe the structural design of an agent system — how its reasoning, memory, and tool‑use components are organized — rather than referencing a specific formal framework (e.g., ACT‑R, SOAR). In context, "robust cognitive architectures" simply means well‑designed multi‑agent systems where each agent selects the right‑sized model for its sub‑task.*
+*Note: The guide uses "cognitive architecture" informally to describe the structural design of an agent system — how its reasoning, memory, and tool‑use components are organized — rather than referencing a specific formal framework. For historical background on formal cognitive architectures, see ACT‑R (Anderson et al., 2004) and Soar (Laird et al., 1987). In context, "robust cognitive architectures" simply means well‑designed multi‑agent systems where each agent selects the right‑sized model for its sub‑task.*
 
 Reasoning tokens are presented as a configurable lever:
 
@@ -331,3 +331,5 @@ Although anchored in Google's ecosystem, the guide's technical core distills to 
 - ReAct (Yao et al., ICLR 2023): <https://arxiv.org/abs/2210.03629>
 - Model Context Protocol (MCP): <https://modelcontextprotocol.io>
 - Agent2Agent Protocol (A2A): <https://google.github.io/A2A>
+- Anderson, J. R., Bothell, D., Byrne, M. D., Douglass, S., Lebiere, C., & Qin, Y. (2004). *An integrated theory of the mind.* **Psychological Review**, 111(4), 1036–1060. <https://doi.org/10.1037/0033-295X.111.4.1036>
+- Laird, J. E., Newell, A., & Rosenbloom, P. S. (1987). *SOAR: An architecture for general intelligence.* **Artificial Intelligence**, 33(1), 1–64. <https://doi.org/10.1016/0004-3702(87)90050-6>
