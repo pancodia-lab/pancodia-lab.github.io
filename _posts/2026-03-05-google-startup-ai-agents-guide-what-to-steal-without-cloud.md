@@ -71,9 +71,9 @@ The key insight across all three paths is that agents are compositional: a produ
 
 ### 2.1 Model ("the brain")
 
-The guide stresses that model selection is about **efficiency, not raw power**:
+The guide stresses that model selection is about finding the right trade‑off — not simply choosing the strongest model:
 
-> "Choosing the right model is not about selecting the most powerful one available, but about finding the optimal balance of capability, speed, and cost for your use case." (p. 9)
+> "Choosing the right model is not about selecting the most powerful one available, but about finding the optimal balance of capability, speed, and cost for your use case. Every model can be evaluated on these three conflicting characteristics, and the goal is to identify the most efficient option for a specific job." (p. 9)
 
 > "The most common mistake is over-investing in capability when a use case doesn't need it, leading to inefficient spending and slower performance. The optimal strategy is to select the most efficient model for any given task." (p. 9)
 
