@@ -79,7 +79,9 @@ The guide stresses that model selection is about finding the right trade‑off �
 
 At the system level, the guide advocates heterogeneous model assignment:
 
-> "Robust cognitive architectures employ multiple specialized agents, each dynamically selecting the leanest model for its specific sub-task. This ensures, for instance, that a heavyweight model is reserved for complex reasoning, while a lightweight model handles routine queries." (p. 9)
+> "Robust cognitive architectures employ multiple specialized agents, each dynamically selecting the leanest model for its specific sub-task. This ensures, for instance, that a heavyweight model is reserved for complex reasoning, while a lightweight model handles routine queries. This multi-agent approach provides the architectural flexibility to optimize the cost and performance of the entire system, not just a single component." (p. 9)
+
+*Note: The guide uses "cognitive architecture" informally to describe the structural design of an agent system — how its reasoning, memory, and tool‑use components are organized — rather than referencing a specific formal framework (e.g., ACT‑R, SOAR). In context, "robust cognitive architectures" simply means well‑designed multi‑agent systems where each agent selects the right‑sized model for its sub‑task.*
 
 Reasoning tokens are presented as a configurable lever:
 
