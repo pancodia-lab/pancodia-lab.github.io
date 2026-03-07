@@ -111,6 +111,13 @@ In production, this typically runs with a structured judge output (`hard_fails`,
 
 To make this concrete, here is a minimal end-to-end example with the full judge prompt pair.
 
+**How this section maps to the evaluator spec**
+
+- The **evaluator spec** is the policy contract (rules + rubric + threshold).
+- The **judge prompts** tell the evaluator model how to apply that contract.
+- The **sample inputs** are one refund case instance.
+- The **sample output** is the scored verdict produced by applying the contract to that instance.
+
 **Prompt 1/2 — Judge system prompt**
 
 ```text
