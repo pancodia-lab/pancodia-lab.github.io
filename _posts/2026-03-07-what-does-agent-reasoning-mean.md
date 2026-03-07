@@ -350,6 +350,56 @@ log_eval_artifacts({
 })
 ```
 
+### Generalization template (for other use cases)
+
+The same evaluator shape generalizes beyond refunds. Keep the scaffold, swap the domain modules.
+
+```yaml
+name: <use_case>_reason_eval
+risk_tier: <low|medium|high>
+reason_state_schema:
+  intent: string
+  known_facts: [string]
+  unknowns: [string]
+  assumptions: [string]
+  constraints: object
+  proposed_next_action: string
+hard_fail_rules:
+  - <must_not_violate_rule_1>
+  - <must_not_violate_rule_2>
+required_facts_before_execute:
+  - <fact_1>
+  - <fact_2>
+forbidden_assumptions:
+  - <assumption_1>
+scoring_rubric:
+  goal_fidelity_0_2: <criterion>
+  state_completeness_0_2: <criterion>
+  uncertainty_handling_0_2: <criterion>
+  action_readiness_0_2: <criterion>
+  policy_alignment_0_2: <criterion>
+pass_threshold:
+  hard_fail_count: 0
+  min_total_score: <threshold_by_risk_tier>
+escalation_policy:
+  on_hard_fail: <block_and_route_to_human>
+  on_low_score: <request_more_evidence_or_human_review>
+```
+
+### KYC-IDV adaptation (example)
+
+Yes, this is directly applicable to KYC-IDV. In that domain, hard-fail rules are stricter and evidence requirements are explicit.
+
+- `required_facts_before_execute`: document authenticity checks, face-match score, sanctions/PEP result, jurisdictional requirements.
+- `forbidden_assumptions`: infer identity from partial match, ignore expired/blurred ID, skip sanctions checks due to timeout.
+- `hard_fail_rules`: approve identity with missing mandatory evidence; override high-risk mismatch without escalation.
+- `policy_context`: AML/KYC policy documents + regional regulations with precedence rules.
+- `escalation_policy`: route to manual review for medium/high-risk ambiguity.
+
+### Attribution note
+
+The evaluator schema in this post is a practical synthesis, not a canonical standard. It combines (a) Google’s trajectory/reasoning evaluation framing (pp. 14, 50–51), (b) rubric-based LLM evaluation practice, and (c) standard safety-engineering control patterns (hard constraints + graded quality + execution gating).
+
 ### Why this matters: AgentOps
 
 If "reasoning" is behavioral, improving it is mostly an engineering problem: better tool contracts, better grounding, better state handling, better constraints, and better evaluation harnesses. This is why the guide is blunt about avoiding "vibes":
