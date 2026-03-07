@@ -107,6 +107,80 @@ Below is a compact example of a **Reason-step evaluator** for the refund scenari
 
 In production, this typically runs with a structured judge output (`hard_fails`, per-criterion scores, `total_score`, `verdict`, and evidence spans), and blocks the action path on hard-fail or low score.
 
+### Filled example: judge input + output
+
+To make this concrete, here is a minimal end-to-end example.
+
+**Sample inputs**
+
+```json
+{
+  "user_request": "I want a refund for order ORD-7781. It arrived yesterday and is defective.",
+  "policy_excerpt": "Refunds are allowed within 30 days of delivery for defective items. Valid order ID required. Refund to original payment method.",
+  "ground_truth_labels": {
+    "intent": "refund_defective_item",
+    "required_facts_before_execute": ["order_id", "delivery_date_within_30_days", "defect_claim_recorded"],
+    "forbidden_assumptions": ["assume_eligibility_without_policy_check"]
+  },
+  "reason_state_json": {
+    "intent": "refund_request",
+    "order_id": "ORD-7781",
+    "policy_needed": true,
+    "known_facts": [
+      "user provided order id ORD-7781",
+      "user reports item defective",
+      "delivery was yesterday"
+    ],
+    "unknowns": ["payment method on file"],
+    "assumptions": [],
+    "constraints": {
+      "refund_window_days": 30,
+      "payment_method_limitations": "original payment method",
+      "requires_human_approval": false
+    },
+    "proposed_next_action": "lookup_order_details_and_validate_refund_eligibility",
+    "should_ask_clarification": false
+  }
+}
+```
+
+**Sample judge output**
+
+```json
+{
+  "hard_fails": [],
+  "scores": {
+    "goal_fidelity_0_2": 2,
+    "state_completeness_0_2": 2,
+    "uncertainty_handling_0_2": 1,
+    "action_readiness_0_2": 2,
+    "policy_alignment_0_2": 2
+  },
+  "total_score": 9,
+  "verdict": "pass",
+  "evidence": [
+    {
+      "criterion": "goal_fidelity_0_2",
+      "quote": "intent: refund_request",
+      "source": "reason_state"
+    },
+    {
+      "criterion": "state_completeness_0_2",
+      "quote": "order_id: ORD-7781",
+      "source": "reason_state"
+    },
+    {
+      "criterion": "policy_alignment_0_2",
+      "quote": "Refunds are allowed within 30 days... Valid order ID required.",
+      "source": "policy_excerpt"
+    }
+  ],
+  "notes": "No hard-fail triggered. Reason step proposes validation before execution; minor uncertainty remains about payment method, so uncertainty score is partial."
+}
+```
+
+This kind of artifact makes trajectory evaluation auditable: reviewers can inspect what was scored, why it passed/failed, and which evidence justified the verdict.
+
 ### Why this matters: AgentOps
 
 If "reasoning" is behavioral, improving it is mostly an engineering problem: better tool contracts, better grounding, better state handling, better constraints, and better evaluation harnesses. This is why the guide is blunt about avoiding "vibes":
