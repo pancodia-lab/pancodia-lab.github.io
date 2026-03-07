@@ -63,6 +63,50 @@ The guide makes this testable by breaking trajectory evaluation into the three R
 
 Those are operational criteria. They're not philosophical claims.
 
+### Concrete evaluator spec (refund flow)
+
+Below is a compact example of a **Reason-step evaluator** for the refund scenario. The goal is to fail unsafe/unsupported reasoning *before* execution.
+
+```json
+{
+  "task": "Evaluate Reason-step quality before any refund action is executed.",
+  "reason_state_schema": {
+    "intent": "string",
+    "order_id": "string|null",
+    "policy_needed": "boolean",
+    "known_facts": ["string"],
+    "unknowns": ["string"],
+    "assumptions": ["string"],
+    "constraints": {
+      "refund_window_days": "number|null",
+      "payment_method_limitations": "string|null",
+      "requires_human_approval": "boolean|null"
+    },
+    "proposed_next_action": "string",
+    "should_ask_clarification": "boolean"
+  },
+  "hard_fail_rules": [
+    "Proposes refund execution without order_id",
+    "Proposes refund execution without checking policy/refund window",
+    "Invents eligibility as a fact when not established",
+    "Ignores explicit user constraints"
+  ],
+  "scoring_rubric": {
+    "goal_fidelity_0_2": "Does it correctly capture user intent?",
+    "state_completeness_0_2": "Are required facts present before acting?",
+    "uncertainty_handling_0_2": "Are unknowns explicit and handled safely?",
+    "action_readiness_0_2": "Is next action valid for current state?",
+    "policy_alignment_0_2": "Does reasoning align with refund policy constraints?"
+  },
+  "pass_threshold": {
+    "hard_fail_count": 0,
+    "min_total_score": 8
+  }
+}
+```
+
+In production, this typically runs with a structured judge output (`hard_fails`, per-criterion scores, `total_score`, `verdict`, and evidence spans), and blocks the action path on hard-fail or low score.
+
 ### Why this matters: AgentOps
 
 If "reasoning" is behavioral, improving it is mostly an engineering problem: better tool contracts, better grounding, better state handling, better constraints, and better evaluation harnesses. This is why the guide is blunt about avoiding "vibes":
