@@ -1,0 +1,99 @@
+<svg width="1100" height="760" viewBox="0 0 1100 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Trajectory Evaluation Loop for Agent Reasoning</title>
+  <desc id="desc">A Reason-Act-Observe loop with evaluation checkpoints at each step and stop/progress decision.</desc>
+
+  <defs>
+    <style>
+      .title { font: 700 34px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #334155; }
+      .label { font: 700 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #0f172a; }
+      .small { font: 500 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #334155; }
+      .eval { font: 600 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #065f46; }
+      .done { font: 700 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; fill: #064e3b; }
+      .box { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2.2; rx: 16; }
+      .step { fill: #eff6ff; stroke: #2563eb; stroke-width: 2.6; rx: 16; }
+      .evalbox { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; rx: 12; }
+      .decision { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2.6; }
+      .arrow { stroke: #475569; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+      .loop { stroke: #7c3aed; stroke-width: 2.8; fill: none; marker-end: url(#arrowheadPurple); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#475569" />
+    </marker>
+    <marker id="arrowheadPurple" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#7c3aed" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1100" height="760" fill="#ffffff"/>
+
+  <text x="550" y="56" text-anchor="middle" class="title">Trajectory Evaluation for Agent Reasoning</text>
+  <text x="550" y="86" text-anchor="middle" class="subtitle">Evaluate the process, not just the final answer</text>
+
+  <!-- User Goal -->
+  <rect x="410" y="120" width="280" height="64" class="box"/>
+  <text x="550" y="160" text-anchor="middle" class="label">User Goal / Task</text>
+
+  <!-- Reason -->
+  <rect x="410" y="230" width="280" height="78" class="step"/>
+  <text x="550" y="276" text-anchor="middle" class="label">1) Reason</text>
+
+  <!-- Act -->
+  <rect x="410" y="356" width="280" height="78" class="step"/>
+  <text x="550" y="402" text-anchor="middle" class="label">2) Act</text>
+
+  <!-- Observe -->
+  <rect x="410" y="482" width="280" height="78" class="step"/>
+  <text x="550" y="528" text-anchor="middle" class="label">3) Observe</text>
+
+  <!-- Decision Diamond -->
+  <polygon points="550,610 655,670 550,730 445,670" class="decision"/>
+  <text x="550" y="664" text-anchor="middle" class="label">Done?</text>
+  <text x="550" y="687" text-anchor="middle" class="small">enough progress +</text>
+  <text x="550" y="707" text-anchor="middle" class="small">correct stopping</text>
+
+  <!-- Eval boxes -->
+  <rect x="740" y="240" width="300" height="58" class="evalbox"/>
+  <text x="890" y="267" text-anchor="middle" class="eval">Eval @ Reason</text>
+  <text x="890" y="287" text-anchor="middle" class="small">Goal/state assessment correct?</text>
+
+  <rect x="740" y="366" width="300" height="58" class="evalbox"/>
+  <text x="890" y="393" text-anchor="middle" class="eval">Eval @ Act</text>
+  <text x="890" y="413" text-anchor="middle" class="small">Right tool + valid arguments?</text>
+
+  <rect x="740" y="492" width="300" height="58" class="evalbox"/>
+  <text x="890" y="519" text-anchor="middle" class="eval">Eval @ Observe</text>
+  <text x="890" y="539" text-anchor="middle" class="small">Integrated tool output correctly?</text>
+
+  <!-- Final output -->
+  <rect x="760" y="644" width="250" height="54" class="evalbox"/>
+  <text x="885" y="675" text-anchor="middle" class="done">Final Answer / Action</text>
+
+  <!-- Arrows main flow -->
+  <path d="M550 184 L550 230" class="arrow"/>
+  <path d="M550 308 L550 356" class="arrow"/>
+  <path d="M550 434 L550 482" class="arrow"/>
+  <path d="M550 560 L550 610" class="arrow"/>
+
+  <!-- Eval connector arrows -->
+  <path d="M690 269 L740 269" class="arrow"/>
+  <path d="M690 395 L740 395" class="arrow"/>
+  <path d="M690 521 L740 521" class="arrow"/>
+
+  <!-- Decision branches -->
+  <path d="M655 670 L760 670" class="arrow"/>
+  <text x="705" y="656" text-anchor="middle" class="small">Yes</text>
+
+  <path d="M445 670 C300 670, 220 600, 220 520 C220 380, 300 280, 410 270" class="loop"/>
+  <text x="244" y="635" class="small" fill="#6d28d9">No → iterate</text>
+
+  <!-- Left explainer -->
+  <rect x="60" y="252" width="300" height="170" class="box"/>
+  <text x="210" y="282" text-anchor="middle" class="label">What is scored?</text>
+  <text x="80" y="312" class="small">• Trajectory quality</text>
+  <text x="80" y="338" class="small">• Tool choice/arguments</text>
+  <text x="80" y="364" class="small">• Observation integration</text>
+  <text x="80" y="390" class="small">• Progress + stopping behavior</text>
+
+  <text x="550" y="748" text-anchor="middle" class="subtitle">Source framing: Google Startup technical guide: AI agents (pp. 14, 50–51)</text>
+</svg>
