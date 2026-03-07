@@ -236,6 +236,12 @@ Instructions:
 
 **Sample input B (more realistic — policy document retrieval context)**
 
+`policy_resolution_order` defines precedence when policy sources conflict:
+
+1. `regional` (jurisdiction/legal rules)
+2. `product_specific` (category-specific policy exceptions)
+3. `global` (default company-wide fallback)
+
 ```json
 {
   "user_request": "I want a refund for order ORD-7781. It arrived yesterday and is defective.",
