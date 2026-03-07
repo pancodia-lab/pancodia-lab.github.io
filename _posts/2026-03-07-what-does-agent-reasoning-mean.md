@@ -113,7 +113,7 @@ A practical setup detail: although LLMs naturally generate free text, production
 
 To keep this post readable, the full runnable artifacts now live in a companion private repo:
 
-- `<https://github.com/pancodia-lab/agent-reasoning-evals>`
+- [agent-reasoning-evals](https://github.com/pancodia-lab/agent-reasoning-evals)
 
 That repo includes:
 
