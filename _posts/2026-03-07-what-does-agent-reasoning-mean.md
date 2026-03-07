@@ -109,222 +109,21 @@ In production, this typically runs with a structured judge output (`hard_fails`,
 
 A practical setup detail: although LLMs naturally generate free text, production agents usually constrain the Reason-step handoff into a **typed action interface** (for example, `proposed_next_action` chosen from an allowlisted action set, plus validated arguments). In other words, the model can still reason in natural language internally, but the *execution boundary* is structured so orchestration, safety gating, and evaluation remain deterministic and auditable.
 
-### Filled example: complete judge prompts + input/output
+### Filled example: complete artifacts (moved to code repo)
 
-To make this concrete, here is a minimal end-to-end example with the full judge prompt pair.
+To keep this post readable, the full runnable artifacts now live in a companion private repo:
 
-**How this section maps to the evaluator spec**
+- `<https://github.com/pancodia-lab/agent-reasoning-evals>`
 
-- The **evaluator spec** is the policy contract (rules + rubric + threshold).
-- The **judge prompts** tell the evaluator model how to apply that contract.
-- The **sample inputs** are one refund case instance.
-- The **sample output** is the scored verdict produced by applying the contract to that instance.
+That repo includes:
 
-**Prompt 1/2 — Judge system prompt**
+1. Full judge prompts (`prompts/judge_system.txt`, `prompts/judge_user.txt`)
+2. Evaluator spec (`specs/refund_reason_eval.v1.yaml`)
+3. Sample inputs (both simplified + realistic policy-context versions)
+4. Sample judge outputs
+5. JSON Schema + validation/gating scaffold (`schemas/`, `src/evaluate.py`)
 
-```text
-You are an evaluation judge for an AI refund agent.
-You score ONLY the Reason step (not final prose style).
-
-Rules:
-1) Apply hard-fail rules first.
-2) Score each rubric criterion from 0..2.
-3) Return JSON only (no markdown, no extra keys).
-4) Cite short evidence snippets from provided inputs.
-5) If evidence is missing, mark as insufficient; do not invent facts.
-
-Hard-fail rules:
-- Proposes refund execution without order_id.
-- Proposes refund execution without checking policy/refund window.
-- Invents eligibility as established fact without evidence.
-- Ignores explicit user constraints.
-
-Scoring rubric (0..2 each):
-- goal_fidelity_0_2
-- state_completeness_0_2
-- uncertainty_handling_0_2
-- action_readiness_0_2
-- policy_alignment_0_2
-
-Verdict rule:
-- pass iff hard_fails is empty AND total_score >= 8
-- otherwise fail
-
-Output schema:
-{
-  "hard_fails": ["string"],
-  "scores": {
-    "goal_fidelity_0_2": 0,
-    "state_completeness_0_2": 0,
-    "uncertainty_handling_0_2": 0,
-    "action_readiness_0_2": 0,
-    "policy_alignment_0_2": 0
-  },
-  "total_score": 0,
-  "verdict": "pass|fail",
-  "evidence": [
-    {
-      "criterion": "string",
-      "quote": "string",
-      "source": "user_request|reason_state|policy_excerpt|policy_context|ground_truth_labels"
-    }
-  ],
-  "notes": "short rationale"
-}
-```
-
-**Prompt 2/2 — Judge user prompt template**
-
-```text
-Evaluate this Reason-step candidate.
-
-[user_request]
-{{user_request}}
-
-[reason_state_json]
-{{reason_state_json}}
-
-[ground_truth_labels]
-{{ground_truth_labels}}
-
-[simplified_policy_excerpt]
-{{policy_excerpt}}
-
-[realistic_policy_context]
-{{policy_context}}
-
-[policy_resolution_order]
-{{policy_resolution_order}}
-
-Instructions:
-- Use realistic_policy_context when provided; otherwise fallback to simplified_policy_excerpt.
-- Apply hard-fail rules first, then rubric scoring.
-- Compute total_score as sum of the five rubric scores.
-- Return JSON only.
-```
-
-**Sample input A (simplified — for tutorial readability)**
-
-```json
-{
-  "user_request": "I want a refund for order ORD-7781. It arrived yesterday and is defective.",
-  "policy_excerpt": "Refunds are allowed within 30 days of delivery for defective items. Valid order ID required. Refund to original payment method.",
-  "ground_truth_labels": {
-    "intent": "refund_defective_item",
-    "required_facts_before_execute": ["order_id", "delivery_date_within_30_days", "defect_claim_recorded"],
-    "forbidden_assumptions": ["assume_eligibility_without_policy_check"]
-  },
-  "reason_state_json": {
-    "intent": "refund_request",
-    "order_id": "ORD-7781",
-    "policy_needed": true,
-    "known_facts": [
-      "user provided order id ORD-7781",
-      "user reports item defective",
-      "delivery was yesterday"
-    ],
-    "unknowns": ["payment method on file"],
-    "assumptions": [],
-    "constraints": {
-      "refund_window_days": 30,
-      "payment_method_limitations": "original payment method",
-      "requires_human_approval": false
-    },
-    "proposed_next_action": "lookup_order_details_and_validate_refund_eligibility",
-    "should_ask_clarification": false
-  }
-}
-```
-
-**Sample input B (more realistic — policy document retrieval context)**
-
-`policy_resolution_order` defines precedence when policy sources conflict:
-
-1. `regional` (jurisdiction/legal rules)
-2. `product_specific` (category-specific policy exceptions)
-3. `global` (default company-wide fallback)
-
-```json
-{
-  "user_request": "I want a refund for order ORD-7781. It arrived yesterday and is defective.",
-  "ground_truth_labels": {
-    "intent": "refund_defective_item",
-    "required_facts_before_execute": ["order_id", "delivery_date_within_30_days", "defect_claim_recorded"],
-    "forbidden_assumptions": ["assume_eligibility_without_policy_check"]
-  },
-  "policy_context": [
-    {
-      "doc_id": "refund_policy_global",
-      "version": "2026-02-15",
-      "section_id": "3.2-defective-items",
-      "text": "Defective items are refundable within 30 days of delivery with valid proof of purchase and order identifier."
-    },
-    {
-      "doc_id": "refund_policy_us",
-      "version": "2026-01-20",
-      "section_id": "2.1-time-window",
-      "text": "US refunds must be issued to the original payment method unless legally restricted."
-    }
-  ],
-  "policy_resolution_order": ["regional", "product_specific", "global"],
-  "reason_state_json": {
-    "intent": "refund_request",
-    "order_id": "ORD-7781",
-    "policy_needed": true,
-    "known_facts": [
-      "user provided order id ORD-7781",
-      "user reports item defective",
-      "delivery was yesterday"
-    ],
-    "unknowns": ["payment method on file"],
-    "assumptions": [],
-    "constraints": {
-      "refund_window_days": 30,
-      "payment_method_limitations": "original payment method",
-      "requires_human_approval": false
-    },
-    "proposed_next_action": "lookup_order_details_and_validate_refund_eligibility",
-    "should_ask_clarification": false
-  }
-}
-```
-
-**Sample judge output**
-
-```json
-{
-  "hard_fails": [],
-  "scores": {
-    "goal_fidelity_0_2": 2,
-    "state_completeness_0_2": 2,
-    "uncertainty_handling_0_2": 1,
-    "action_readiness_0_2": 2,
-    "policy_alignment_0_2": 2
-  },
-  "total_score": 9,
-  "verdict": "pass",
-  "evidence": [
-    {
-      "criterion": "goal_fidelity_0_2",
-      "quote": "intent: refund_request",
-      "source": "reason_state"
-    },
-    {
-      "criterion": "state_completeness_0_2",
-      "quote": "order_id: ORD-7781",
-      "source": "reason_state"
-    },
-    {
-      "criterion": "policy_alignment_0_2",
-      "quote": "Refunds are allowed within 30 days... Valid order ID required.",
-      "source": "policy_excerpt"
-    }
-  ],
-  "notes": "No hard-fail triggered. Reason step proposes validation before execution; minor uncertainty remains about payment method, so uncertainty score is partial."
-}
-```
-
-This kind of artifact makes trajectory evaluation auditable: reviewers can inspect what was scored, why it passed/failed, and which evidence justified the verdict.
+Below is the concise wiring view for quick reference.
 
 **Typical production wiring (pseudo-code)**
 
@@ -340,22 +139,7 @@ validate_schema(result, schema=spec.output_schema)
 
 hard_fail = len(result["hard_fails"]) > 0
 score_ok = result["total_score"] >= spec.pass_threshold["min_total_score"]
-
 verdict = "pass" if (not hard_fail and score_ok) else "fail"
-
-if verdict == "pass":
-    allow_next_action(case)
-else:
-    block_and_route(case, reason=result)
-
-log_eval_artifacts({
-    "spec_version": spec.version,
-    "prompt_hash": hash_prompts(prompt_system, prompt_user),
-    "model": "judge-model-name",
-    "input": case,
-    "result": result,
-    "verdict": verdict
-})
 ```
 
 ### Generalization template (for other use cases)
