@@ -107,11 +107,94 @@ Below is a compact example of a **Reason-step evaluator** for the refund scenari
 
 In production, this typically runs with a structured judge output (`hard_fails`, per-criterion scores, `total_score`, `verdict`, and evidence spans), and blocks the action path on hard-fail or low score.
 
-### Filled example: judge input + output
+### Filled example: complete judge prompts + input/output
 
-To make this concrete, here is a minimal end-to-end example.
+To make this concrete, here is a minimal end-to-end example with the full judge prompt pair.
 
-**Sample inputs**
+**Prompt 1/2 — Judge system prompt**
+
+```text
+You are an evaluation judge for an AI refund agent.
+You score ONLY the Reason step (not final prose style).
+
+Rules:
+1) Apply hard-fail rules first.
+2) Score each rubric criterion from 0..2.
+3) Return JSON only (no markdown, no extra keys).
+4) Cite short evidence snippets from provided inputs.
+5) If evidence is missing, mark as insufficient; do not invent facts.
+
+Hard-fail rules:
+- Proposes refund execution without order_id.
+- Proposes refund execution without checking policy/refund window.
+- Invents eligibility as established fact without evidence.
+- Ignores explicit user constraints.
+
+Scoring rubric (0..2 each):
+- goal_fidelity_0_2
+- state_completeness_0_2
+- uncertainty_handling_0_2
+- action_readiness_0_2
+- policy_alignment_0_2
+
+Verdict rule:
+- pass iff hard_fails is empty AND total_score >= 8
+- otherwise fail
+
+Output schema:
+{
+  "hard_fails": ["string"],
+  "scores": {
+    "goal_fidelity_0_2": 0,
+    "state_completeness_0_2": 0,
+    "uncertainty_handling_0_2": 0,
+    "action_readiness_0_2": 0,
+    "policy_alignment_0_2": 0
+  },
+  "total_score": 0,
+  "verdict": "pass|fail",
+  "evidence": [
+    {
+      "criterion": "string",
+      "quote": "string",
+      "source": "user_request|reason_state|policy_excerpt|policy_context|ground_truth_labels"
+    }
+  ],
+  "notes": "short rationale"
+}
+```
+
+**Prompt 2/2 — Judge user prompt template**
+
+```text
+Evaluate this Reason-step candidate.
+
+[user_request]
+{{user_request}}
+
+[reason_state_json]
+{{reason_state_json}}
+
+[ground_truth_labels]
+{{ground_truth_labels}}
+
+[simplified_policy_excerpt]
+{{policy_excerpt}}
+
+[realistic_policy_context]
+{{policy_context}}
+
+[policy_resolution_order]
+{{policy_resolution_order}}
+
+Instructions:
+- Use realistic_policy_context when provided; otherwise fallback to simplified_policy_excerpt.
+- Apply hard-fail rules first, then rubric scoring.
+- Compute total_score as sum of the five rubric scores.
+- Return JSON only.
+```
+
+**Sample input A (simplified — for tutorial readability)**
 
 ```json
 {
@@ -122,6 +205,53 @@ To make this concrete, here is a minimal end-to-end example.
     "required_facts_before_execute": ["order_id", "delivery_date_within_30_days", "defect_claim_recorded"],
     "forbidden_assumptions": ["assume_eligibility_without_policy_check"]
   },
+  "reason_state_json": {
+    "intent": "refund_request",
+    "order_id": "ORD-7781",
+    "policy_needed": true,
+    "known_facts": [
+      "user provided order id ORD-7781",
+      "user reports item defective",
+      "delivery was yesterday"
+    ],
+    "unknowns": ["payment method on file"],
+    "assumptions": [],
+    "constraints": {
+      "refund_window_days": 30,
+      "payment_method_limitations": "original payment method",
+      "requires_human_approval": false
+    },
+    "proposed_next_action": "lookup_order_details_and_validate_refund_eligibility",
+    "should_ask_clarification": false
+  }
+}
+```
+
+**Sample input B (more realistic — policy document retrieval context)**
+
+```json
+{
+  "user_request": "I want a refund for order ORD-7781. It arrived yesterday and is defective.",
+  "ground_truth_labels": {
+    "intent": "refund_defective_item",
+    "required_facts_before_execute": ["order_id", "delivery_date_within_30_days", "defect_claim_recorded"],
+    "forbidden_assumptions": ["assume_eligibility_without_policy_check"]
+  },
+  "policy_context": [
+    {
+      "doc_id": "refund_policy_global",
+      "version": "2026-02-15",
+      "section_id": "3.2-defective-items",
+      "text": "Defective items are refundable within 30 days of delivery with valid proof of purchase and order identifier."
+    },
+    {
+      "doc_id": "refund_policy_us",
+      "version": "2026-01-20",
+      "section_id": "2.1-time-window",
+      "text": "US refunds must be issued to the original payment method unless legally restricted."
+    }
+  ],
+  "policy_resolution_order": ["regional", "product_specific", "global"],
   "reason_state_json": {
     "intent": "refund_request",
     "order_id": "ORD-7781",
