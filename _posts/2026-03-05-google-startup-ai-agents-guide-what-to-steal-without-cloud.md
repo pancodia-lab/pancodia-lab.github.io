@@ -147,6 +147,8 @@ Core runtime capabilities include scalability, security, and reliability/observa
 
 *Note:* In current production stacks, the most commonly adopted runtime choices are **Temporal** (durable workflow orchestration), **LangGraph** (agent-state runtime), and managed cloud runtimes such as **Google Vertex AI Agent Builder/ADK**, **AWS Bedrock Agents**, and **Azure AI Agent Service**. In practice, teams choose between maximum control (Temporal + custom loop) and fastest managed path (cloud-hosted agent runtime).
 
+At a high level, a production runtime usually includes an execution/orchestration loop (Reason–Act–Observe control flow), durable state and memory stores, a tool invocation gateway with validation and timeout controls, scheduling/queueing for asynchronous work, guardrail and policy enforcement, and an observability layer (traces, logs, metrics, and trajectory evaluation hooks). This component view helps readers map the abstract "runtime" idea to concrete system boundaries in real deployments.
+
 ---
 
 ## 3. Grounding: from retrieval to reasoning
