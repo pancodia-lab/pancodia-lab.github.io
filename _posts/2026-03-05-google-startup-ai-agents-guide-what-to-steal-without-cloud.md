@@ -139,15 +139,13 @@ The guide notes the importance of mastering orchestration:
 
 ### 2.4 Runtime ("the body")
 
-The runtime handles production deployment concerns:
+The runtime is the production infrastructure that turns an agent prototype into a deployable, scalable product:
 
 > "Deploying a functional agent prototype into a production environment requires a robust runtime infrastructure. The runtime facilitates agent deployment at scale, turning a prototype into a reliable product that handles complex operational requirements like security, load balancing, and error handling, especially during periods of unpredictable user growth." (p. 16)
 
-Core runtime capabilities include scalability, security, and reliability/observability (p. 16).
+At a high level, a production agent runtime comprises several key components: an execution/orchestration engine that drives the Reason–Act–Observe control loop; durable state and memory stores for session persistence and recovery; a tool invocation gateway with input validation, authentication, rate limiting, and timeout controls; task scheduling and queueing for asynchronous and long-running workflows; a guardrail and policy enforcement layer for safety gating; and an observability stack covering traces, logs, metrics, and trajectory evaluation hooks (p. 16).
 
-*Note:* In current production stacks, the most commonly adopted runtime choices are **Temporal** (durable workflow orchestration), **LangGraph** (agent-state runtime), and managed cloud runtimes such as **Google Vertex AI Agent Builder/ADK**, **AWS Bedrock Agents**, and **Azure AI Agent Service**. In practice, teams choose between maximum control (Temporal + custom loop) and fastest managed path (cloud-hosted agent runtime).
-
-At a high level, a production runtime usually includes an execution/orchestration loop (Reason–Act–Observe control flow), durable state and memory stores, a tool invocation gateway with validation and timeout controls, scheduling/queueing for asynchronous work, guardrail and policy enforcement, and an observability layer (traces, logs, metrics, and trajectory evaluation hooks). This component view helps readers map the abstract "runtime" idea to concrete system boundaries in real deployments.
+*Note:* In current production stacks, the most commonly adopted runtime choices include **Temporal** (durable workflow orchestration with built-in retry and state durability), **LangGraph** (graph-based agent-state runtime), and managed cloud platforms such as **Google Vertex AI Agent Builder/ADK**, **AWS Bedrock Agents**, and **Azure AI Agent Service**. Teams typically choose between maximum control (Temporal or similar orchestrator + custom agent loop) and fastest time-to-production (managed cloud runtime, accepting vendor coupling).
 
 ---
 
